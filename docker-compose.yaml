@@ -1,0 +1,50 @@
+version: "3"
+
+services:
+  app: &django
+    volumes:
+      - .:/opt/app
+    restart: unless-stopped
+    container_name: social_dev
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    ports:
+      - "8000:8000"
+    depends_on:
+      - postgres_dev
+      - redis_dev
+    env_file:
+      - ./.env
+    networks:
+      - social_network
+    command: /start
+
+  postgres_dev:
+    image: postgres:14.4-alpine
+    container_name: social_postgres_dev
+    restart: unless-stopped
+    ports:
+      - "5435:5432"
+    volumes:
+      - social_postgres_data:/var/lib/postgresql/data
+    env_file:
+      - ./.env
+    networks:
+      - social_network
+
+  redis_dev:
+    image: redis:latest
+    container_name: social_redis_dev
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    networks:
+      - social_network
+
+
+volumes:
+  social_postgres_data:
+
+networks:
+  social_network:
